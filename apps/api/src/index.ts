@@ -25,6 +25,8 @@ const handler = trpcExpress.createExpressMiddleware({
   middleware: cors({
     origin: CLIENT_DOMAIN || "http://localhost:3001",
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   }),
 
   createContext,
