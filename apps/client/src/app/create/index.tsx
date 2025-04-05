@@ -13,7 +13,7 @@ export function CreateCommitteePage() {
   const joinCommittee = useJoinCommittee(navigate);
   const { isLoggedIn } = useUser();
 
-  if (!isLoggedIn) {
+  if (isLoggedIn) {
     return <Navigate to="/committee" />;
   }
   async function onSubmit(

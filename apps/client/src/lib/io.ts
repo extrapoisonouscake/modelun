@@ -1,3 +1,4 @@
+import { API_URL } from "@/constants";
 import { AppState, useAppStore } from "@/lib/store";
 import {
   ClientToServerEvents,
@@ -26,7 +27,7 @@ export let socket:
   | undefined;
 
 export const initSocket = () => {
-  socket = io("http://localhost:3002", {
+  socket = io(API_URL, {
     withCredentials: true,
   });
   socket.on("connect", () => {

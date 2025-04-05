@@ -1,6 +1,6 @@
 {
   "extends": ["//"],
-  "globalEnv": ["VITE_TRPC_URL"],
+  "globalEnv": ["VITE_API_URL"],
   "tasks": {
     "build": {
       "outputs": ["dist/**"]
