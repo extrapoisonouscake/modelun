@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { v4 as uuid } from "uuid";
-import { redis, REDIS_KEY_EXPIRATION_TIME, redisKeys } from "../../db/redis";
+import { redis, redisKeys } from "../../db/redis";
 import { generateSixDigitCode } from "../../helpers";
 import { getSocketRoomFullPath, io } from "../../io";
 import { socketEvents, type Committee, type VotingSession } from "../../types";
@@ -54,9 +54,7 @@ export const chairRouter = router({
         ),
         redis.hset(
           ...redisKeys.committeeByCode(newCommittee.code),
-          newCommittee.id,
-          "EX",
-          REDIS_KEY_EXPIRATION_TIME
+          newCommittee.id
         ),
       ]);
 

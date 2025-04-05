@@ -1,5 +1,4 @@
 import { TRPCError } from "@trpc/server";
-import { isProd } from "../../constants";
 import { redis, redisKeys } from "../../db/redis";
 import { getSocketRoomFullPath, io } from "../../io";
 import { CHAIR_IDENTIFIER, socketEvents, type VotingRecord } from "../../types";
@@ -129,7 +128,7 @@ export const committeeRouter = router({
 
       ctx.res.cookie("session", sessionToken, {
         httpOnly: false,
-        secure: isProd,
+        secure: false, //!isProd,
         maxAge: 1000 * 60 * 60 * 24, // 1 day
         path: "/",
       });
