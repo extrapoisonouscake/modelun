@@ -21,6 +21,7 @@
     "@repo/api": "workspace:^",
     "@tailwindcss/vite": "^4.0.9",
     "@trpc/client": "11.0.0-rc.819",
+    "@trpc/server": "11.0.0-rc.819",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "countries-list": "^3.1.1",

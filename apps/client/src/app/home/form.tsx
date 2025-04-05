@@ -14,7 +14,6 @@ import { getCountryData, getEmojiFlag, TCountryCode } from "countries-list";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { useNavigate } from "react-router";
-import { toast } from "sonner";
 import { AlphanumericInput } from "./alphanumeric-input";
 
 type LimitedCommittee = AppRouterOutput["committee"]["find"];
@@ -25,11 +24,7 @@ export function JoinCommitteeForm() {
   const navigate = useNavigate();
   const joinCommittee = useJoinCommittee(navigate);
   async function onSubmit(data: JoinCommitteeSchema) {
-    try {
-      await joinCommittee(data);
-    } catch (e: any) {
-      toast.error(e.message);
-    }
+    await joinCommittee(data);
   }
   return (
     <Form className="flex flex-col gap-2" {...form} onSubmit={onSubmit}>

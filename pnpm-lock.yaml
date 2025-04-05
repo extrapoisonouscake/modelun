@@ -159,6 +159,9 @@ importers:
       '@trpc/client':
         specifier: 11.0.0-rc.819
         version: 11.0.0-rc.819(@trpc/server@11.0.0-rc.819)(typescript@5.7.3)
+      '@trpc/server':
+        specifier: 11.0.0-rc.819
+        version: 11.0.0-rc.819(typescript@5.7.3)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
