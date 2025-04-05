@@ -1,5 +1,6 @@
 {
   "extends": ["//"],
+  "globalEnv": ["NODE_ENV"],
   "tasks": {
     "build": {
       "env": ["JWT_SECRET", "PORT"],
