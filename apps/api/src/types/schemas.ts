@@ -4,26 +4,40 @@ import { z } from "zod";
 export const committeeSchema = z.object({
   id: z.string(),
   name: z.string(),
-  topics: z.array(z.string()),
+  code: z.string(),
   passphrase: z.string(),
-});
-
-export const participantSchema = z.object({
-  committeeId: committeeSchema.shape.id,
-  countryCode: z.string(),
+  chairId: z.string(),
+  description: z.string().optional(),
+  countries: z.array(z.string()),
+  customCountries: z
+    .record(
+      z.object({
+        name: z.string(),
+        imageUrl: z.string(),
+        emoji: z.string().optional(),
+      })
+    )
+    .optional(),
 });
 
 export const votingSessionSchema = z.object({
   id: z.string(),
   committeeId: committeeSchema.shape.id,
-  topic: z.string(),
-  startTime: z.date(),
-  endTime: z.date(),
+  name: z.string(),
+  description: z.string().optional(),
+  isOpen: z.boolean(),
+  startTime: z.date().optional(),
+  endTime: z.date().optional(),
 });
 
 export const votingRecordSchema = z.object({
-  id: z.string(),
+  countryCode: z.string(),
   sessionId: votingSessionSchema.shape.id,
-  countryCode: participantSchema.shape.countryCode,
   choice: z.union([z.literal("YAY"), z.literal("NAY"), z.literal("ABSTAIN")]),
 });
+
+export const votingSessionWithRecordsSchema = votingSessionSchema.and(
+  z.object({
+    records: z.array(votingRecordSchema),
+  })
+);

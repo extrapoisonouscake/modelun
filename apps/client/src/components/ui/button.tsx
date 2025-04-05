@@ -3,9 +3,10 @@ import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
+import { Spinner } from "./spinner";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+  "cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
   {
     variants: {
       variant: {
@@ -33,8 +34,9 @@ const buttonVariants = cva(
     },
   }
 );
-interface ButtonProps
-  extends React.ComponentProps<"button">,
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   isLoading?: boolean;
@@ -42,34 +44,29 @@ interface ButtonProps
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
 }
+
 function Button({
   className,
-
-  asChild = false,
-  isLoading: externalIsLoading = false,
-  shouldShowChildrenOnLoading = true,
-  leftIcon,
-  ref,
-  disabled,
-  onClick,
   variant,
   size,
+  asChild = false,
+  isLoading: externalIsLoading = false,
+  shouldShowChildrenOnLoading = false,
+  leftIcon,
   rightIcon,
   children,
+  onClick,
   ...props
 }: ButtonProps) {
   const Comp = asChild ? Slot : "button";
-
   const [isLoading, setIsLoading] = React.useState(externalIsLoading);
   const hasExternalIsLoading = typeof externalIsLoading === "boolean";
-
   const derivedIsLoading = hasExternalIsLoading ? externalIsLoading : isLoading;
   return (
     <Comp
-      className={cn(buttonVariants({ variant, size, className }))}
-      ref={ref}
       type="button"
-      disabled={disabled || derivedIsLoading}
+      data-slot="button"
+      className={cn(buttonVariants({ variant, size, className }))}
       {...props}
       onClick={
         hasExternalIsLoading
@@ -93,20 +90,5 @@ function Button({
     </Comp>
   );
 }
-export const Spinner = ({ className }: { className?: string }) => (
-  <svg
-    className={cn("animate-spin", className)}
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-  </svg>
-);
+
 export { Button, buttonVariants };

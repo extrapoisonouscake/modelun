@@ -1,5 +1,6 @@
 import { SelectProps } from "@radix-ui/react-select";
-import { FieldValues, useFormContext } from "react-hook-form";
+import { ReactNode } from "react";
+import { useFormContext } from "react-hook-form";
 import {
   FormControl,
   FormDescription,
@@ -16,7 +17,7 @@ import {
   SelectValue,
 } from "./select";
 
-export function FormSelect<T extends FieldValues>({
+export function FormSelect({
   name,
   label,
   options,
@@ -27,7 +28,12 @@ export function FormSelect<T extends FieldValues>({
 }: {
   name: /*Path<T>*/ any;
   label: string;
-  options: { label: string; value: string }[];
+  options: {
+    label: string;
+    value: string;
+    leftItem?: ReactNode;
+    disabled?: boolean;
+  }[];
   placeholder?: string;
   description?: string;
   onChange?: () => void;
@@ -56,13 +62,14 @@ export function FormSelect<T extends FieldValues>({
               {...field}
             >
               <FormControl>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder={placeholder} />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {options.map(({ value, label }) => (
-                  <SelectItem value={value} key={value}>
+                {options.map(({ value, label, disabled, leftItem }) => (
+                  <SelectItem value={value} key={value} disabled={disabled}>
+                    {leftItem}
                     {label}
                   </SelectItem>
                 ))}

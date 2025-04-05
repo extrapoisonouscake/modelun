@@ -1,14 +1,19 @@
-import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
-import { getSession } from "next-auth/react";
+import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
 
-/**
- * Creates context for an incoming request
- * @see https://trpc.io/docs/v11/context
- */
-export async function createContext(opts: CreateNextContextOptions) {
-  const session = await getSession({ req: opts.req });
-
+import { type SessionTokenPayload, verifySessionToken } from "./helpers";
+export const createContext = async ({
+  req,
+  res,
+}: CreateExpressContextOptions) => {
+  let session: SessionTokenPayload | null = null;
+  const sessionToken = req.cookies.session;
+  if (sessionToken) {
+    session = await verifySessionToken(sessionToken);
+  }
   return {
     session,
+    res,
   };
-}
+};
+
+export type Context = Awaited<ReturnType<typeof createContext>>;

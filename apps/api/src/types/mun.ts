@@ -1,23 +1,33 @@
 export interface Committee {
   id: string;
   name: string;
-  topics: string[];
+  code: string;
   passphrase: string;
+  chairId: string;
+  description?: string;
+  countries: string[];
+  customCountries?: Record<
+    string,
+    //* not reusing type due to zod limitations
+    {
+      name: string;
+      imageUrl: string;
+      emoji?: string;
+    }
+  >;
 }
-export interface Participant {
-  committeeId: Committee["id"];
-  countryCode: string;
-}
+
 export interface VotingSession {
   id: string;
-  committeeId: Committee["id"];
-  topic: string;
-  startTime: Date;
-  endTime: Date;
+  name: string;
+  description?: string;
+  wasOpen: boolean;
 }
+export type VotingSessionWithRecords = VotingSession & {
+  records: VotingRecord[];
+};
 export interface VotingRecord {
-  id: string;
+  countryCode: string;
   sessionId: VotingSession["id"];
-  countryCode: Participant["countryCode"];
   choice: "YAY" | "NAY" | "ABSTAIN";
 }

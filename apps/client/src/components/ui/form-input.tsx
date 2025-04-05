@@ -1,7 +1,7 @@
 import { useFormContext } from "react-hook-form";
 
+import { WithRequired } from "@/types/utils";
 import { forwardRef } from "react";
-import { WithRequired } from "../../types/utils";
 import {
   FormControl,
   FormDescription,
