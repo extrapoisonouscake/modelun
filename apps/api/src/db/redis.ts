@@ -4,7 +4,7 @@ interface CustomRedis extends Redis {
   operations: typeof commonOperations;
 }
 //@ts-expect-error extend redis client type
-export const redis: CustomRedis = new Redis();
+export const redis: CustomRedis = new Redis(process.env.REDIS_URL);
 
 redis.on("error", (e) => {
   console.error(e);

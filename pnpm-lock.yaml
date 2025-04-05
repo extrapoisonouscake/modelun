@@ -8,6 +8,12 @@ importers:
 
   .:
     devDependencies:
+      '@repo/eslint-config':
+        specifier: workspace:^
+        version: link:packages/config-eslint
+      eslint-config-turbo:
+        specifier: ^2.5.0
+        version: 2.5.0(eslint@9.21.0)(turbo@2.4.4)
       prettier:
         specifier: ^3.5.0
         version: 3.5.0
@@ -2199,7 +2205,7 @@ packages:
       rollup:
         optional: true
     dependencies:
-      '@rollup/pluginutils': 5.1.4(rollup@4.34.8)
+      '@rollup/pluginutils': 5.1.4
       estree-walker: 2.0.2
       magic-string: 0.30.17
     dev: true
@@ -2259,6 +2265,20 @@ packages:
     dependencies:
       '@rollup/pluginutils': 5.1.4(rollup@4.34.8)
       rollup: 4.34.8
+    dev: true
+
+  /@rollup/pluginutils@5.1.4:
+    resolution: {integrity: sha512-USm05zrsFxYLPdWWq+K3STlWiT/3ELn3RcV5hJMghpeAIhxfsUIg6mt12CBJBInWMV4VneoV7SfGv8xIwo2qNQ==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
+    peerDependenciesMeta:
+      rollup:
+        optional: true
+    dependencies:
+      '@types/estree': 1.0.6
+      estree-walker: 2.0.2
+      picomatch: 4.0.2
     dev: true
 
   /@rollup/pluginutils@5.1.4(rollup@4.34.8):
@@ -4790,6 +4810,17 @@ packages:
       eslint: 9.21.0
     dev: true
 
+  /eslint-config-turbo@2.5.0(eslint@9.21.0)(turbo@2.4.4):
+    resolution: {integrity: sha512-QJvZBEWDWQx1JyQCr0uwf4aQYhDSAGoHBdx+cPtpPzNEjZw16Ig8BglXxHZBh3I8/fI1U53cLgXwvb28BUZhPA==}
+    peerDependencies:
+      eslint: '>6.6.0'
+      turbo: '>2.0.0'
+    dependencies:
+      eslint: 9.21.0
+      eslint-plugin-turbo: 2.5.0(eslint@9.21.0)(turbo@2.4.4)
+      turbo: 2.4.4
+    dev: true
+
   /eslint-plugin-only-warn@1.1.0:
     resolution: {integrity: sha512-2tktqUAT+Q3hCAU0iSf4xAN1k9zOpjK5WO8104mB0rT/dGhOa09582HN5HlbxNbPRZ0THV7nLGvzugcNOSjzfA==}
     engines: {node: '>=6'}
@@ -4833,6 +4864,17 @@ packages:
 
   /eslint-plugin-turbo@2.4.0(eslint@9.21.0)(turbo@2.4.4):
     resolution: {integrity: sha512-qCgoRi/OTc1VMxab7+sdKiV1xlkY4qjK9sM+kS7+WogrB1DxLguJSQXvk4HA13SD5VmJsq+8FYOw5q4EUk6Ixg==}
+    peerDependencies:
+      eslint: '>6.6.0'
+      turbo: '>2.0.0'
+    dependencies:
+      dotenv: 16.0.3
+      eslint: 9.21.0
+      turbo: 2.4.4
+    dev: true
+
+  /eslint-plugin-turbo@2.5.0(eslint@9.21.0)(turbo@2.4.4):
+    resolution: {integrity: sha512-qQk54MrUZv0gnpxV23sccTc+FL3UJ8q7vG7HmXuS2RP8gdjWDwI1CCJTJD8EdRIDjsMxF0xi0AKcMY0CwIlXVg==}
     peerDependencies:
       eslint: '>6.6.0'
       turbo: '>2.0.0'
