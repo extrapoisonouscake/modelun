@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useInitializedAppStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { CommitteeParticipants } from "@/types/api";
+import { FullCommittee } from "@/types/api";
 import { VotingRecord } from "@repo/api";
 import { votingChoicesLabels } from "../data";
 import { flattenCountryInfo } from "../helpers";
@@ -18,6 +18,7 @@ const votingChoices = [
 ] as const satisfies VotingRecord["choice"][];
 
 export const Participants = () => {
+  const committee = useInitializedAppStore((state) => state.committee);
   const participants = useInitializedAppStore((state) => state.participants);
   const { customCountries } = useInitializedAppStore(
     (state) => state.committee
@@ -32,7 +33,7 @@ export const Participants = () => {
     const votingSession = votingSessions[currentVotingSessionId];
     if (!votingSession) return null;
     const participantsByChoice = divideParticipantsByChoice(
-      participants,
+      committee.countries,
       votingSession.records
     );
     return (
@@ -44,7 +45,7 @@ export const Participants = () => {
                 {votingChoicesLabels[choice]}
               </p>
               <div className="flex flex-wrap gap-2 max-w-[100px]">
-                {participantsByChoice[choice].map(({ countryCode }) => {
+                {participantsByChoice[choice].map((countryCode) => {
                   const { name, emoji, imageUrl } = flattenCountryInfo(
                     countryCode,
                     customCountries
@@ -101,22 +102,18 @@ export const Participants = () => {
   );
 };
 function divideParticipantsByChoice(
-  participants: CommitteeParticipants,
+  participants: FullCommittee["countries"],
   votingRecords: Record<string, VotingRecord>
 ) {
-  const participantsByChoice: Record<
-    VotingRecord["choice"],
-    CommitteeParticipants
-  > = {
+  const participantsByChoice: Record<VotingRecord["choice"], string[]> = {
     YAY: [],
     NAY: [],
     ABSTAIN: [],
   };
-  participants.forEach((participant) => {
-    const { countryCode } = participant;
+  participants.forEach((countryCode) => {
     const record = votingRecords[countryCode];
     if (!record) return;
-    participantsByChoice[record.choice].push(participant);
+    participantsByChoice[record.choice].push(countryCode);
   });
   return participantsByChoice;
 }
