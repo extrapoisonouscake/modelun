@@ -11,5 +11,8 @@ export function AuthorizedOnly({
   if (!isLoggedIn) {
     return <Navigate to="/" />;
   }
+  return <Component component={component} />;
+}
+function Component({ component }: { component: () => React.ReactNode }) {
   return component();
 }

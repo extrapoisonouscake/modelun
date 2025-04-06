@@ -29,13 +29,16 @@ export type AppState = {
   endVotingSession: (votingSessionId: string) => void;
 };
 
-export const useAppStore = create<AppState>((set, get) => ({
+const initialState = {
   committee: undefined,
   countryCode: undefined,
   participants: undefined,
   votingSessions: undefined,
   currentVotingSessionId: null,
   isLoaded: false,
+};
+export const useAppStore = create<AppState>((set, get) => ({
+  ...initialState,
   setCurrentVotingSessionId: (currentVotingSessionId) =>
     set({ currentVotingSessionId }),
   setCommittee: (committee) => set({ committee }),
@@ -130,12 +133,12 @@ export const useAppStore = create<AppState>((set, get) => ({
     });
   },
   setIsLoaded: (isLoaded) => set({ isLoaded }),
-  reset: () => set({ committee: undefined, countryCode: undefined }),
+  reset: () => set(initialState),
 }));
 
 type CommitteeSlices = Pick<
   AppState,
-  "committee" | "participants" | "votingSessions" | "currentVotingSessionId"
+  Exclude<keyof typeof initialState, "isLoaded">
 >;
 export type LoadedCommitteeData = {
   [K in keyof CommitteeSlices]-?: NonNullable<AppState[K]>;

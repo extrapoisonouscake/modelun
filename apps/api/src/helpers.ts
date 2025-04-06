@@ -1,12 +1,7 @@
 import crypto from "crypto";
-const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
 export function generateSixDigitCode() {
-  let code = "";
-
-  for (let i = 0; i < 6; i++) {
-    const randomIndex = crypto.randomInt(0, charset.length); // Generate random index
-    code += charset[randomIndex]; // Append corresponding character to the code
-  }
-
+  const randomNumber = crypto.randomInt(0, 1000000); // Generate random number between 0-999999
+  const code = randomNumber.toString().padStart(6, "0"); // Convert to string and pad with leading zeros if needed
   return code;
 }

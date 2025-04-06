@@ -14,7 +14,6 @@ export function LogOutButton({ className }: { className?: string }) {
       onClick={async () => {
         navigate("/");
         await trpcClient.committee.logOut.mutate();
-
         store.reset();
       }}
       variant="outline"

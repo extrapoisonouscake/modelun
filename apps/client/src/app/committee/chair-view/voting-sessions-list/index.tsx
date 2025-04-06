@@ -28,34 +28,36 @@ export function VotesList() {
   return (
     <div className="flex flex-col gap-2">
       <p>Voting Sessions</p>
-      <ul>
-        {Object.values(votingSessions).map((votingSession) => (
-          <li key={votingSession.id} className="flex gap-2">
-            <h3>
-              {votingSession.name}
-              {votingSession.wasOpen && (
-                <VotesSummary records={votingSession.records} />
-              )}
-            </h3>
+      {Object.keys(votingSessions).length > 0 && (
+        <ul>
+          {Object.values(votingSessions).map((votingSession) => (
+            <li key={votingSession.id} className="flex gap-2">
+              <h3>
+                {votingSession.name}
+                {votingSession.wasOpen && (
+                  <VotesSummary records={votingSession.records} />
+                )}
+              </h3>
 
-            <PlayIcon
-              className="size-4 cursor-pointer"
-              onClick={() => onStart(votingSession.id)}
-            />
-            <ConfirmationModal intent="delete this voting session">
-              <TrashIcon
-                className="size-4"
-                onClick={async () => {
-                  await trpcClient.chair.deleteVotingSession.mutate({
-                    id: votingSession.id,
-                  });
-                  deleteVotingSession(votingSession.id);
-                }}
+              <PlayIcon
+                className="size-4 cursor-pointer"
+                onClick={() => onStart(votingSession.id)}
               />
-            </ConfirmationModal>
-          </li>
-        ))}
-      </ul>
+              <ConfirmationModal intent="delete this voting session">
+                <TrashIcon
+                  className="size-4"
+                  onClick={async () => {
+                    await trpcClient.chair.deleteVotingSession.mutate({
+                      id: votingSession.id,
+                    });
+                    deleteVotingSession(votingSession.id);
+                  }}
+                />
+              </ConfirmationModal>
+            </li>
+          ))}
+        </ul>
+      )}
       <AddVotingSession />
     </div>
   );

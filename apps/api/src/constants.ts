@@ -8,5 +8,6 @@ export const COUNTRY_CODES = Object.keys(countries);
 
 const DOMAIN_NAME = process.env.DOMAIN_NAME;
 
-export const CLIENT_ORIGIN =
-  `https://${DOMAIN_NAME}` || "http://localhost:3001";
+export const CLIENT_ORIGIN = DOMAIN_NAME
+  ? `https://${DOMAIN_NAME}`
+  : "http://localhost:3001";

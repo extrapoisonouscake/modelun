@@ -19,6 +19,7 @@ function CommitteePageContent() {
     setCurrentVotingSessionId,
   } = useAppStore();
   const { isChair } = useUser();
+  console.log({ isLoaded });
   useEffect(() => {
     if (!isLoaded) {
       trpcClient.committee.getMine

@@ -2,7 +2,7 @@ import { z } from "zod";
 import { CHAIR_IDENTIFIER } from "../../constants";
 import { votingRecordSchema } from "../../types";
 const joinCommitteeBareSchema = z.object({
-  code: z.string().min(6),
+  code: z.string().regex(/^[0-9]{6}$/),
   passphrase: z.string().optional(),
   countryCode: z.string(),
 });

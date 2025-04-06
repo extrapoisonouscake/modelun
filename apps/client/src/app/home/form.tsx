@@ -13,7 +13,7 @@ import { FormInput } from "@/components/ui/form-input";
 import { getCountryData, getEmojiFlag, TCountryCode } from "countries-list";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { AlphanumericInput } from "./alphanumeric-input";
 
 type LimitedCommittee = AppRouterOutput["committee"]["find"];
@@ -27,14 +27,25 @@ export function JoinCommitteeForm() {
     await joinCommittee(data);
   }
   return (
-    <Form className="flex flex-col gap-2" {...form} onSubmit={onSubmit}>
+    <Form
+      className="flex flex-col gap-2 w-full max-w-[400px] mx-auto"
+      {...form}
+      onSubmit={onSubmit}
+    >
       {committee ? (
         <Confirmation
           committee={committee}
           goBack={() => setCommittee(undefined)}
         />
       ) : (
-        <CommitteeSearch setCommittee={setCommittee} />
+        <>
+          <CommitteeSearch setCommittee={setCommittee} />
+          <Link to="/create">
+            <Button variant="outline" className="w-full">
+              Create Committee
+            </Button>
+          </Link>
+        </>
       )}
     </Form>
   );
@@ -44,12 +55,19 @@ function CommitteeSearch({
 }: {
   setCommittee: (committee: LimitedCommittee) => void;
 }) {
-  const form = useFormContext();
+  const form = useFormContext<JoinCommitteeSchema>();
+  const [isLoading, setIsLoading] = useState(false);
   async function findCommittee() {
-    const committee = await trpcClient.committee.find.query({
-      code: form.getValues("code"),
-    });
-    setCommittee(committee);
+    const isValid = await form.trigger("code");
+    if (!isValid) return;
+    setIsLoading(true);
+    try {
+      const committee = await trpcClient.committee.find.query({
+        code: form.getValues("code"),
+      });
+      setCommittee(committee);
+    } catch {}
+    setIsLoading(false);
   }
   return (
     <>
@@ -57,15 +75,32 @@ function CommitteeSearch({
       <FormField
         control={form.control}
         name="code"
-        render={({ field }) => (
-          <AlphanumericInput
-            className="self-center"
-            value={field.value}
-            onChange={field.onChange}
-          />
-        )}
+        render={({ field, formState }) => {
+          const errorMessage = formState.errors.code?.message;
+          return (
+            <>
+              <AlphanumericInput
+                className="self-center"
+                value={field.value}
+                onChange={(newValue) => {
+                  field.onChange(newValue);
+                  if (newValue.length === 6) {
+                    findCommittee();
+                  }
+                }}
+              />
+              {errorMessage && (
+                <p className="text-destructive-foreground text-sm">
+                  {errorMessage}
+                </p>
+              )}
+            </>
+          );
+        }}
       />
-      <Button onClick={findCommittee}>Check</Button>
+      <Button onClick={findCommittee} isLoading={isLoading}>
+        Check
+      </Button>
     </>
   );
 }

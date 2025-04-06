@@ -1,4 +1,5 @@
 import { API_URL } from "@/constants";
+import { notifyAllCookiesListeners } from "@/hooks/use-cookie";
 import type { AppRouter } from "@repo/api";
 
 import { createTRPCClient, httpBatchLink, TRPCLink } from "@trpc/client";
@@ -22,6 +23,7 @@ export const customLink: TRPCLink<AppRouter> = () => {
         },
         complete() {
           observer.complete();
+          notifyAllCookiesListeners();
         },
       });
       return unsubscribe;

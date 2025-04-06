@@ -1,7 +1,7 @@
 import { SessionTokenPayload } from "@repo/api";
 import jwt from "jsonwebtoken";
 import { useMemo } from "react";
-import { useCookies } from "react-cookie";
+import { useCookie } from "./use-cookie";
 
 /**
  * Represents a logged-in user with their session information
@@ -31,7 +31,8 @@ type LoggedOutUser = {
 export function useUser<T extends boolean = false>(
   forceLoggedIn: T = false as T
 ): T extends true ? LoggedInUser : LoggedInUser | LoggedOutUser {
-  const [{ session }] = useCookies(["session"]);
+  const session = useCookie("session");
+  console.log({ session });
   const userState = useMemo(() => {
     let isChair = false;
     let countryCode: string | undefined;
