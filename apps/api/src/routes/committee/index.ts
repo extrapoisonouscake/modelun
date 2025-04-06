@@ -1,4 +1,6 @@
 import { TRPCError } from "@trpc/server";
+import type { CookieOptions } from "express";
+import { isProd } from "../../constants";
 import { redis, redisKeys } from "../../db/redis";
 import { getSocketRoomFullPath, io } from "../../io";
 import { CHAIR_IDENTIFIER, socketEvents, type VotingRecord } from "../../types";
@@ -9,7 +11,13 @@ import {
 } from "../procedures";
 import { publicProcedure, router } from "../trpc";
 import { findCommitteeSchema, joinCommitteeSchema, voteSchema } from "./public";
-
+const BASE_COOKIE_OPTIONS: CookieOptions = {
+  httpOnly: false,
+  secure: isProd,
+  path: "/",
+  domain: process.env.DOMAIN_NAME,
+  sameSite: "lax",
+};
 export const committeeRouter = router({
   find: publicProcedure
     .input(findCommitteeSchema)
@@ -127,13 +135,8 @@ export const committeeRouter = router({
         );
 
       ctx.res.cookie("session", sessionToken, {
-        httpOnly: false,
-        secure: false, //!isProd,
+        ...BASE_COOKIE_OPTIONS,
         maxAge: 1000 * 60 * 60 * 24, // 1 day
-        expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
-        path: "/",
-        domain: process.env.DOMAIN_NAME,
-        sameSite: "lax",
       });
       return committee;
     }),
@@ -145,7 +148,7 @@ export const committeeRouter = router({
         socketEvents.participants.left,
         countryCode
       );
-      ctx.res.clearCookie("session");
+      ctx.res.clearCookie("session", BASE_COOKIE_OPTIONS);
     }
   }),
   vote: votingSessionInProgressProcedure
