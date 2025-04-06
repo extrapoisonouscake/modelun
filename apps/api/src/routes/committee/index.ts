@@ -132,9 +132,7 @@ export const committeeRouter = router({
         maxAge: 1000 * 60 * 60 * 24, // 1 day
         expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
         path: "/",
-        domain: process.env.CLIENT_DOMAIN
-          ? new URL(process.env.CLIENT_DOMAIN).hostname
-          : undefined,
+        domain: process.env.DOMAIN_NAME,
         sameSite: "lax",
       });
       return committee;
