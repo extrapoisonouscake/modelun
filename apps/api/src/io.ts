@@ -1,6 +1,6 @@
 import type { Server as HttpServer } from "http";
 import { Server } from "socket.io";
-import { isDev } from "./constants";
+import { CLIENT_ORIGIN, isDev } from "./constants";
 import { verifySessionToken, type SessionTokenPayload } from "./routes/helpers";
 import {
   socketEvents,
@@ -25,7 +25,7 @@ export const initializeSocketIO = (server: HttpServer) => {
     cors: {
       origin: isDev
         ? ["http://localhost:3000", "http://localhost:3001"]
-        : undefined,
+        : CLIENT_ORIGIN,
       credentials: true,
     },
   });
