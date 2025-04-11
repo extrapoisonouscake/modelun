@@ -21,7 +21,8 @@ function CommitteePageContent() {
   const { isChair } = useUser();
   console.log({ isLoaded });
   useEffect(() => {
-    if (!isLoaded) {
+    //!TEMPORARY
+    const timeout = setTimeout(() => {
       trpcClient.committee.getMine
         .query()
         .then(
@@ -35,10 +36,11 @@ function CommitteePageContent() {
             setParticipants(participants);
             setVotingSessions(votingSessions);
             setCurrentVotingSessionId(currentVotingSessionId);
-            setIsLoaded(true);
+           if(!isLoaded) setIsLoaded(true);
           }
         );
-    }
+    }, 500);
+    return () => clearTimeout(timeout);
   }, []);
 
   if (!isLoaded) return <Spinner />;
