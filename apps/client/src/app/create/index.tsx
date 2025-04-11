@@ -33,6 +33,6 @@ export function CreateCommitteePage() {
     }
   }
   return (
-    <div className="flex flex-col gap-2"><CommitteeSettingsForm onSubmit={onSubmit} schema={createCommitteeSchema} /><Link to="/"><Button variant="outline">Have an invite code?</Button></Link></div>
+    <div className="flex flex-col gap-2"><h3 className="text-2xl">Create Committee</h3><CommitteeSettingsForm onSubmit={onSubmit} schema={createCommitteeSchema} /><Link to="/"><Button variant="outline">Have an invite code?</Button></Link></div>
   );
 }
