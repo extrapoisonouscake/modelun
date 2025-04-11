@@ -24,7 +24,7 @@ function CountryInfo() {
   );
   const { name, imageUrl } = flattenCountryInfo(countryCode, customCountries);
   return (
-    <div className="flex items-center gap-3 w-full justify-center">
+    <div className="flex items-center gap-2 w-full justify-center">
       <img src={imageUrl} alt={name} className="h-6 rounded-sm object-cover" />
       <p className="text-base">{name}</p>
     </div>

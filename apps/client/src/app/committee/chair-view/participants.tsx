@@ -1,3 +1,4 @@
+import { LoadungText } from "@/components/misc/loading-text";
 import { Card } from "@/components/ui/card";
 import {
   Tooltip,
@@ -5,7 +6,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useInitializedAppStore } from "@/lib/store";
+import {
+  LoadedCommitteeData,
+  useInitializedAppStore,
+  VotingSessionWithRecords,
+} from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { FullCommittee } from "@/types/api";
 import { VotingRecord } from "@repo/api";
@@ -17,12 +22,10 @@ const votingChoices = [
   "ABSTAIN",
 ] as const satisfies VotingRecord["choice"][];
 
-export const Participants = () => {
+export function Participants() {
   const committee = useInitializedAppStore((state) => state.committee);
   const participants = useInitializedAppStore((state) => state.participants);
-  const { customCountries } = useInitializedAppStore(
-    (state) => state.committee
-  );
+
   const votingSessions = useInitializedAppStore(
     (state) => state.votingSessions
   );
@@ -32,55 +35,84 @@ export const Participants = () => {
   if (currentVotingSessionId) {
     const votingSession = votingSessions[currentVotingSessionId];
     if (!votingSession) return null;
-    const participantsByChoice = divideParticipantsByChoice(
-      committee.countries,
-      votingSession.records
-    );
     return (
-      <div className="flex flex-wrap gap-3 flex-1">
-        {votingChoices.map((choice) => {
-          return (
-            <div key={choice} className="flex flex-col items-center gap-2">
-              <p className="text-sm text-gray-500">
-                {votingChoicesLabels[choice]}
-              </p>
-              <div className="flex flex-wrap gap-2 max-w-[100px]">
-                {participantsByChoice[choice].map((countryCode) => {
-                  const { name, emoji, imageUrl } = flattenCountryInfo(
-                    countryCode,
-                    customCountries
-                  );
-                  return (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <img
-                            src={imageUrl}
-                            alt={name}
-                            className="h-6 rounded-sm"
-                          />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>
-                            {emoji ? `${emoji} ` : ""}
-                            {name}
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      <ParticipantsVotingView
+        votingSession={votingSession}
+        committee={committee}
+      />
     );
   }
   return (
-    <>
-      <div className="flex flex-wrap gap-3 flex-1">
-        {participants.map(({ countryCode, isOnline }) => {
+    <ParticipantsList
+      participants={participants}
+      customCountries={committee.customCountries}
+    />
+  );
+}
+
+function ParticipantsVotingView({
+  votingSession,
+  committee,
+}: {
+  votingSession: VotingSessionWithRecords;
+  committee: FullCommittee;
+}) {
+  const participantsByChoice = divideCountriesByChoice(
+    committee.countries,
+    votingSession.records
+  );
+  return (
+    <div className="flex flex-col gap-3 w-full max-w-[600px]">
+      {votingChoices.map((choice) => {
+        return (
+          <div key={choice} className="flex items-center gap-2 w-full">
+            <p className="text-sm text-gray-500 min-w-[80px] shrink-0">
+              {votingChoicesLabels[choice]}
+            </p>
+            <div className="grid grid-cols-[repeat(auto-fill,48px)] gap-2 w-full">
+              {participantsByChoice[choice].map((countryCode) => {
+                const { name, emoji, imageUrl } = flattenCountryInfo(
+                  countryCode,
+                  committee.customCountries
+                );
+                return (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <img
+                          src={imageUrl}
+                          alt={name}
+                          className="h-6 rounded-sm"
+                        />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>
+                          {emoji ? `${emoji} ` : ""}
+                          {name}
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+function ParticipantsList({
+  participants,
+  customCountries,
+}: {
+  participants: LoadedCommitteeData["participants"];
+  customCountries: FullCommittee["customCountries"];
+}) {
+  return (
+    <div className="flex flex-wrap gap-3 flex-1">
+      {participants.length > 0 ? (
+        participants.map(({ countryCode, isOnline }) => {
           const { name, imageUrl } = flattenCountryInfo(
             countryCode,
             customCountries
@@ -96,13 +128,15 @@ export const Participants = () => {
               <p className="text-base font-medium">{name}</p>
             </Card>
           );
-        })}
-      </div>
-    </>
+        })
+      ) : (
+        <LoadungText>Waiting for members to join...</LoadungText>
+      )}
+    </div>
   );
-};
-function divideParticipantsByChoice(
-  participants: FullCommittee["countries"],
+}
+function divideCountriesByChoice(
+  countries: FullCommittee["countries"],
   votingRecords: Record<string, VotingRecord>
 ) {
   const participantsByChoice: Record<VotingRecord["choice"], string[]> = {
@@ -110,7 +144,7 @@ function divideParticipantsByChoice(
     NAY: [],
     ABSTAIN: [],
   };
-  participants.forEach((countryCode) => {
+  countries.forEach((countryCode) => {
     const record = votingRecords[countryCode];
     if (!record) return;
     participantsByChoice[record.choice].push(countryCode);

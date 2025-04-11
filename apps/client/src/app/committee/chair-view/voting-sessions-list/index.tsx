@@ -1,4 +1,5 @@
 import { ConfirmationModal } from "@/components/misc/confirmation-modal";
+import { Button } from "@/components/ui/button";
 import { useAppStore, useInitializedAppStore } from "@/lib/store";
 import { trpcClient } from "@/utils/trpc";
 import { VotingRecord, VotingSession } from "@repo/api";
@@ -23,11 +24,20 @@ export function VotesList() {
     });
     startVotingSession(id);
   };
+  const onDelete = async (id: VotingSession["id"]) => {
+    await trpcClient.chair.deleteVotingSession.mutate({
+      id,
+    });
+    deleteVotingSession(id);
+  };
   if (currentVotingSessionId)
     return <VotingSessionControls id={currentVotingSessionId} />;
   return (
-    <div className="flex flex-col gap-2">
-      <p>Voting Sessions</p>
+    <div className="flex flex-col gap-2 md:absolute md:right-0 md:top-0">
+      <div className="flex items-center gap-2">
+        <p className="font-medium">Voting Sessions</p>
+        <AddVotingSession />
+      </div>
       {Object.keys(votingSessions).length > 0 && (
         <ul>
           {Object.values(votingSessions).map((votingSession) => (
@@ -39,26 +49,30 @@ export function VotesList() {
                 )}
               </h3>
 
-              <PlayIcon
-                className="size-4 cursor-pointer"
-                onClick={() => onStart(votingSession.id)}
-              />
-              <ConfirmationModal intent="delete this voting session">
-                <TrashIcon
-                  className="size-4"
-                  onClick={async () => {
-                    await trpcClient.chair.deleteVotingSession.mutate({
-                      id: votingSession.id,
-                    });
-                    deleteVotingSession(votingSession.id);
-                  }}
-                />
-              </ConfirmationModal>
+              <div className="flex">
+                <Button
+                  variant="outline"
+                  className="rounded-r-none"
+                  size="icon-sm"
+                  onClick={() => onStart(votingSession.id)}
+                >
+                  <PlayIcon className="size-4 cursor-pointer" />
+                </Button>
+                <ConfirmationModal intent="delete this voting session">
+                  <Button
+                    variant="outline"
+                    size="icon-sm"
+                    className="border-l-none rounded-l-none"
+                    onClick={() => onDelete(votingSession.id)}
+                  >
+                    <TrashIcon className="size-4" />
+                  </Button>
+                </ConfirmationModal>
+              </div>
             </li>
           ))}
         </ul>
       )}
-      <AddVotingSession />
     </div>
   );
 }

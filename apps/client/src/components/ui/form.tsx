@@ -28,12 +28,6 @@ function Form<T extends FieldValues>({
     <FormProvider {...props}>
       <form
         onSubmit={props.handleSubmit(onSubmit)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && e.target instanceof HTMLInputElement) {
-            e.preventDefault();
-            return false;
-          }
-        }}
         className={cn("flex flex-col gap-3", className)}
       >
         {children}

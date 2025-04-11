@@ -23,9 +23,7 @@ export interface VotingSession {
   description?: string;
   wasOpen: boolean;
 }
-export type VotingSessionWithRecords = VotingSession & {
-  records: VotingRecord[];
-};
+
 export interface VotingRecord {
   countryCode: string;
   sessionId: VotingSession["id"];

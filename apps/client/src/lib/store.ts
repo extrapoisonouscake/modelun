@@ -1,7 +1,7 @@
 import { CommitteeParticipants, FullCommittee } from "@/types/api";
 import { VotingRecord, VotingSession } from "@repo/api";
 import { create } from "zustand";
-type VotingSessionWithRecords = VotingSession & {
+export type VotingSessionWithRecords = VotingSession & {
   records: Record<string, VotingRecord>;
 };
 export type AppState = {

@@ -26,6 +26,7 @@
     "clsx": "^2.1.1",
     "countries-list": "^3.1.1",
     "date-fns": "^4.1.0",
+    "input-otp": "^1.4.2",
     "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",

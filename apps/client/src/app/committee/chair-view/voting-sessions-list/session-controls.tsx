@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/lib/store";
 import { trpcClient } from "@/utils/trpc";
 import { VotingSession } from "@repo/api";
+import { Octagon } from "lucide-react";
 
 export function VotingSessionControls({ id }: { id: VotingSession["id"] }) {
   const endVotingSession = useAppStore((state) => state.endVotingSession);
@@ -11,8 +12,9 @@ export function VotingSessionControls({ id }: { id: VotingSession["id"] }) {
   };
   return (
     <div className="flex flex-col gap-2">
-      <p>Session Controls</p>
-      <Button onClick={onEnd}>End</Button>
+      <Button onClick={onEnd} leftIcon={<Octagon />}>
+        End
+      </Button>
     </div>
   );
 }

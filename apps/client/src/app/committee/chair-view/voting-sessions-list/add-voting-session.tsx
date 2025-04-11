@@ -25,8 +25,8 @@ export function AddVotingSession() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" leftIcon={<PlusIcon />}>
-          Add
+        <Button variant="outline" size="icon-sm">
+          <PlusIcon />
         </Button>
       </DialogTrigger>
       <DialogContent>

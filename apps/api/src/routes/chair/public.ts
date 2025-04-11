@@ -1,9 +1,12 @@
 import { z } from "zod";
-import { committeeSchema, votingSessionSchema } from "../../types/schemas";
+import { committeeSchema } from "../../types/schemas";
 export const customCountrySchema = z.object({
   name: z.string().min(1),
   code: z.string().min(1),
-  imageUrl: z.string().min(1),
+  imageUrl: z
+    .string()
+    .min(1)
+    .regex(/^https?:\/\//, "Enter a valid URL."),
   emoji: z
     .string()
     .regex(/^\p{Emoji}\u{FE0F}?\u{200D}?(?:\p{Emoji}\u{FE0F}?\u{200D}?)*$/u)
@@ -26,9 +29,9 @@ export const updateCommitteeSchema = createCommitteeSchema
   .omit({ passphrase: true })
   .partial();
 export type UpdateCommitteeSchema = z.infer<typeof updateCommitteeSchema>;
-export const createVotingSessionSchema = votingSessionSchema.pick({
-  name: true,
-  description: true,
+export const createVotingSessionSchema = z.object({
+  name: z.string().min(1),
+  description: z.string().min(1).optional(),
 });
 export type CreateVotingSessionSchema = z.infer<
   typeof createVotingSessionSchema

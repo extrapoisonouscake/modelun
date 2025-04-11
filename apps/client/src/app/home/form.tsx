@@ -1,5 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { Form, FormField } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { FormSelect } from "@/components/ui/form-select";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/ui/submit-button";
@@ -10,11 +17,15 @@ import { AppRouterOutput, CHAIR_IDENTIFIER } from "@repo/api";
 import { JoinCommitteeSchema, joinCommitteeSchema } from "@repo/api/schemas";
 
 import { FormInput } from "@/components/ui/form-input";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 import { getCountryData, getEmojiFlag, TCountryCode } from "countries-list";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { Link, useNavigate } from "react-router";
-import { AlphanumericInput } from "./alphanumeric-input";
 
 type LimitedCommittee = AppRouterOutput["committee"]["find"];
 export function JoinCommitteeForm() {
@@ -70,38 +81,42 @@ function CommitteeSearch({
     setIsLoading(false);
   }
   return (
-    <>
-      <Label>Enter the code</Label>
+    <div className="flex flex-col gap-4">
       <FormField
         control={form.control}
         name="code"
-        render={({ field, formState }) => {
-          const errorMessage = formState.errors.code?.message;
-          return (
-            <>
-              <AlphanumericInput
-                className="self-center"
-                value={field.value}
-                onChange={(newValue) => {
-                  field.onChange(newValue);
-                  if (newValue.length === 6) {
+        render={({ field }) => (
+          <FormItem className="self-center">
+            <FormLabel>Committee Code</FormLabel>
+            <FormControl>
+              <InputOTP
+                maxLength={6}
+                pattern="^[0-9]+$"
+                {...field}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
                     findCommittee();
                   }
                 }}
-              />
-              {errorMessage && (
-                <p className="text-destructive-foreground text-sm">
-                  {errorMessage}
-                </p>
-              )}
-            </>
-          );
-        }}
+              >
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} />
+                  <InputOTPSlot index={1} />
+                  <InputOTPSlot index={2} />
+                  <InputOTPSlot index={3} />
+                  <InputOTPSlot index={4} />
+                  <InputOTPSlot index={5} />
+                </InputOTPGroup>
+              </InputOTP>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
       />
       <Button onClick={findCommittee} isLoading={isLoading}>
         Check
       </Button>
-    </>
+    </div>
   );
 }
 function Confirmation({

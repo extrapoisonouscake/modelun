@@ -159,6 +159,7 @@ export function CountriesSelectionList() {
           onKeyDown={(e) => {
             if (!searchValue) return;
             if (e.key === "Enter") {
+              e.preventDefault();
               addCountry();
             } else if (e.key === "ArrowDown") {
               setHoveredCountryIndex((hoveredCountryIndex) => {

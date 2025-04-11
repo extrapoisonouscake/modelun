@@ -40,7 +40,11 @@ export function CommitteeSettingsForm({
 
   const selectedCountries = form.watch("countries") || [];
   return (
-    <Form {...form} onSubmit={(data) => onSubmit(data, setErrorMessage)}>
+    <Form
+      className="w-full max-w-[600px] self-center"
+      {...form}
+      onSubmit={(data) => onSubmit(data, setErrorMessage)}
+    >
       {errorMessageNode}
       <FormInput name="name" label="Name" />
       <FormField

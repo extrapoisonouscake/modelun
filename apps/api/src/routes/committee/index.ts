@@ -29,7 +29,7 @@ export const committeeRouter = router({
       if (!committeeId) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Committee not found",
+          message: "A committee with this code does not exist.",
         });
       }
       const [committee, participants] = await Promise.all([
