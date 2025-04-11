@@ -22,8 +22,8 @@ function CommitteePageContent() {
   console.log({ isLoaded });
   useEffect(() => {
     //!TEMPORARY
-    console.log("FEGEGEGE")
-    const timeout = setTimeout(() => {
+    console.log()
+    const interval = setInterval(() => {
       trpcClient.committee.getMine
         .query()
         .then(
@@ -41,7 +41,7 @@ function CommitteePageContent() {
           }
         );
     }, 500);
-    return () => clearTimeout(timeout);
+    return () => clearInterval(interval);
   }, []);
 
   if (!isLoaded) return <Spinner />;
