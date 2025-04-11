@@ -22,6 +22,7 @@ function CommitteePageContent() {
   console.log({ isLoaded });
   useEffect(() => {
     //!TEMPORARY
+    console.log("FEGEGEGE")
     const timeout = setTimeout(() => {
       trpcClient.committee.getMine
         .query()
