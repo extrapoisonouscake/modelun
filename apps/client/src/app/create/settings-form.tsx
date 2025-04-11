@@ -41,7 +41,6 @@ export function CommitteeSettingsForm({
   const selectedCountries = form.watch("countries") || [];
   return (
     <Form
-      className="w-full max-w-[600px] self-center"
       {...form}
       onSubmit={(data) => onSubmit(data, setErrorMessage)}
     >
