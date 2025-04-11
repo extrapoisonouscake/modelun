@@ -28,6 +28,7 @@ export let socket:
 
 export const initSocket = () => {
   socket = io(API_URL, {
+    path: "/api/socket.io",
     withCredentials: true,
   });
   socket.on("connect", () => {
