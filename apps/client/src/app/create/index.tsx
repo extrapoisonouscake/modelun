@@ -1,12 +1,13 @@
 import { useJoinCommittee } from "@/hooks/use-join-committee";
 import { useUser } from "@/hooks/use-user";
+import {Button} from "@/components/ui/button"
 import { trpcClient } from "@/utils/trpc";
 import {
   CHAIR_IDENTIFIER,
   createCommitteeSchema,
   CreateCommitteeSchema,
 } from "@repo/api";
-import { Navigate, useNavigate } from "react-router";
+import { Navigate, useNavigate,Link } from "react-router";
 import { CommitteeSettingsForm } from "./settings-form";
 export function CreateCommitteePage() {
   const navigate = useNavigate();
@@ -32,6 +33,6 @@ export function CreateCommitteePage() {
     }
   }
   return (
-    <CommitteeSettingsForm onSubmit={onSubmit} schema={createCommitteeSchema} />
+    <div className="flex flex-col gap-2"><CommitteeSettingsForm onSubmit={onSubmit} schema={createCommitteeSchema} /><Link to="/"><Button variant="outline">Have an invite code?</Button></Link></div>
   );
 }
