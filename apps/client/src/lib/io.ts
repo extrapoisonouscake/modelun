@@ -32,9 +32,9 @@ export const initSocket = () => {
   socket = io(API_URL, {
     ackTimeout: 3000,
     retries: 3,
-    path: `${!IS_DEV ? "/api" : ""}/socket.io`,
+    path: !IS_DEV ? "/api/" : undefined,
     withCredentials: true,
-   transports: ['websocket']
+    transports: ["websocket"],
   });
   socket.on("connect", () => {
     console.log("Connected to server");
