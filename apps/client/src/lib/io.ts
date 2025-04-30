@@ -1,4 +1,4 @@
-import { API_URL, IS_DEV } from "@/constants";
+import { IS_DEV, ROOT_URL } from "@/constants";
 import { getUser } from "@/hooks/use-user";
 import { AppState, useAppStore } from "@/lib/store";
 import { performForceLogOut } from "@/utils/perform-force-log-out";
@@ -29,7 +29,7 @@ export let socket:
   | undefined;
 
 export const initSocket = () => {
-  socket = io(API_URL, {
+  socket = io(ROOT_URL, {
     ackTimeout: 3000,
     retries: 3,
     path: !IS_DEV ? "/api/socket.io" : undefined,
