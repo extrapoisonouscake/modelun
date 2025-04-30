@@ -46,8 +46,10 @@ export function CommitteeInfo() {
   const committee = useInitializedAppStore((state) => state.committee);
   return (
     <div className="flex flex-col gap-1">
-      <h1 className="text-2xl font-bold text-center">{committee.name}</h1>
-      <p className="text-sm text-gray-500 text-center">
+      <h1 className="text-2xl font-bold text-center md:text-left">
+        {committee.name}
+      </h1>
+      <p className="text-sm text-gray-500 text-center md:text-left">
         {committee.description}
       </p>
     </div>
