@@ -69,7 +69,7 @@ function ParticipantsVotingView({
   return (
     <div className="flex flex-col gap-4 w-full max-w-[600px]">
       {votingChoices.map((choice, index) => {
-        const countries = Array(24).fill(participantsByChoice[choice]).flat();
+        const countries = participantsByChoice[choice];
         return (
           <>
             <div className="flex items-center gap-2 w-full">
