@@ -34,6 +34,7 @@ export const initSocket = () => {
     retries: 3,
     path: `${!IS_DEV ? "/api" : ""}/socket.io`,
     withCredentials: true,
+   transports: ['websocket']
   });
   socket.on("connect", () => {
     console.log("Connected to server");
