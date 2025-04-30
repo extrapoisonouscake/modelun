@@ -117,7 +117,7 @@ export function CommitteeSettingsForm({
         name="description"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Description</FormLabel>
+            <FormLabel>Description (optional)</FormLabel>
             <FormControl>
               <Textarea
                 {...field}

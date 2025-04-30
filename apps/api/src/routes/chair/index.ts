@@ -47,6 +47,7 @@ export const chairRouter = router({
         chairId,
         countries: input.countries,
         customCountries: input.customCountries,
+        description: input.description,
       } satisfies Committee;
       await Promise.all([
         redis.set(

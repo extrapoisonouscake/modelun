@@ -59,7 +59,7 @@ function AddVotingSessionForm({ closeDialog }: { closeDialog: () => void }) {
         placeholder={'For example: "Sanctions on Atlantis"'}
       />
       <FormInput
-        label="Description"
+        label="Description (optional)"
         name="description"
         placeholder={
           'For example: "Vote on resolution A/RES/1234 regarding economic sanctions"'
