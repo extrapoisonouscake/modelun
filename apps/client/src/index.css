@@ -133,3 +133,17 @@
     @apply bg-background text-foreground text-sm;
   }
 }
+body {
+  font-family:
+    "Twemoji Country Flags",
+    var(
+      --default-font-family,
+      ui-sans-serif,
+      system-ui,
+      sans-serif,
+      "Apple Color Emoji",
+      "Segoe UI Emoji",
+      "Segoe UI Symbol",
+      "Noto Color Emoji"
+    );
+}

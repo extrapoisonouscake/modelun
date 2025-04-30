@@ -174,6 +174,9 @@ importers:
       countries-list:
         specifier: ^3.1.1
         version: 3.1.1
+      country-flag-emoji-polyfill:
+        specifier: ^0.1.8
+        version: 0.1.8
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
@@ -4162,6 +4165,10 @@ packages:
 
   /countries-list@3.1.1:
     resolution: {integrity: sha512-nPklKJ5qtmY5MdBKw1NiBAoyx5Sa7p2yPpljZyQ7gyCN1m+eMFs9I6CT37Mxt8zvR5L3VzD3DJBE4WQzX3WF4A==}
+    dev: false
+
+  /country-flag-emoji-polyfill@0.1.8:
+    resolution: {integrity: sha512-Mbah52sADS3gshUYhK5142gtUuJpHYOXlXtLFI3Ly4RqgkmPMvhX9kMZSTqDM8P7UqtSW99eHKFphhQSGXA3Cg==}
     dev: false
 
   /create-ecdh@4.0.4:
