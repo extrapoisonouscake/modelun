@@ -15,7 +15,7 @@ export function App() {
   }, [isLoggedIn]);
   return (
     <>
-      <Toaster />
+      <Toaster richColors />
       <main className="flex justify-center flex-col items-stretch p-4">
         <AppRoutes />
       </main>

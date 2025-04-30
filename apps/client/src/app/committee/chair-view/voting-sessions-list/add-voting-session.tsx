@@ -53,8 +53,18 @@ function AddVotingSessionForm({ closeDialog }: { closeDialog: () => void }) {
   }
   return (
     <Form {...form} onSubmit={onSubmit}>
-      <FormInput label="Name" name="name" />
-      <FormInput label="Description" name="description" />
+      <FormInput
+        label="Topic"
+        name="name"
+        placeholder={'For example: "Sanctions on Atlantis"'}
+      />
+      <FormInput
+        label="Description"
+        name="description"
+        placeholder={
+          'For example: "Vote on resolution A/RES/1234 regarding economic sanctions"'
+        }
+      />
 
       <SubmitButton>Add</SubmitButton>
     </Form>

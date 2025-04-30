@@ -1,9 +1,12 @@
 import { TRPCError } from "@trpc/server";
 import type { CookieOptions } from "express";
+import { v4 as uuid } from "uuid";
 import { isProd } from "../../constants";
 import { redis, redisKeys } from "../../db/redis";
 import { getSocketRoomFullPath, io } from "../../io";
 import { CHAIR_IDENTIFIER, socketEvents, type VotingRecord } from "../../types";
+import { matchString } from "../chair/helpers";
+import type { Context } from "../context";
 import { generateSessionToken } from "../helpers";
 import {
   authenticatedProcedure,
@@ -18,30 +21,43 @@ const BASE_COOKIE_OPTIONS: CookieOptions = {
   domain: process.env.DOMAIN_NAME,
   sameSite: "lax",
 };
+const ensureNotBanned = async (ctx: Context, committeeId: string) => {
+  const bannedDeviceIds =
+    await redis.operations.getBannedDeviceIds(committeeId);
+  if (bannedDeviceIds.includes(ctx.cookies[DEVICE_ID_COOKIE_NAME])) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "You are banned from this committee.",
+    });
+  }
+};
+export const DEVICE_ID_COOKIE_NAME = "deviceId";
 export const committeeRouter = router({
   find: publicProcedure
     .input(findCommitteeSchema)
 
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
       const committeeId = await redis.operations.getCommitteeIdByCode(
         input.code
       );
       if (!committeeId) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "A committee with this code does not exist.",
+          message: "We couldn't find a committee with this code.",
         });
       }
       const [committee, participants] = await Promise.all([
         redis.operations.getCommittee(committeeId),
         redis.operations.getParticipants(committeeId),
       ]);
+
       if (!committee || !participants) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Committee not found",
+          message: "Committee not found.",
         });
       }
+      await ensureNotBanned(ctx, committeeId);
       const { name, description, countries, customCountries } = committee;
 
       return {
@@ -49,7 +65,7 @@ export const committeeRouter = router({
         description,
         countries: countries.map((code) => ({
           code,
-          isAvailable: !participants.has(code),
+          isAvailable: !participants[code],
         })),
         customCountries,
       };
@@ -77,10 +93,10 @@ export const committeeRouter = router({
     const connectedParticipants = (
       await io.in(getSocketRoomFullPath(committee.id)).fetchSockets()
     ).map((socket) => socket.data.session.countryCode);
-    const participantsWithStatus = Array.from(participants).map(
-      (participant) => ({
-        countryCode: participant,
-        isOnline: connectedParticipants.includes(participant),
+    const participantsWithStatus = Object.entries(participants).map(
+      ([countryCode]) => ({
+        countryCode,
+        isOnline: connectedParticipants.includes(countryCode),
       })
     );
     const currentVotingSessionId =
@@ -100,28 +116,41 @@ export const committeeRouter = router({
       if (!committeeId) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Committee not found",
+          message: "Committee not found.",
         });
       }
       const committee = await redis.operations.getCommittee(committeeId);
       if (!committee) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Committee not found",
+          message: "Committee not found.",
         });
       }
-
+      await ensureNotBanned(ctx, committeeId);
       const isChairCountry = countryCode === CHAIR_IDENTIFIER;
+
       if (isChairCountry) {
-        if (passphrase !== committee.passphrase) {
+        if (!passphrase || !matchString(passphrase, committee.passphrase)) {
           throw new TRPCError({
             code: "UNAUTHORIZED",
-            message: "Invalid passphrase",
+            message: "Invalid passphrase.",
           });
         }
+      } else {
+        let deviceId = ctx.cookies[DEVICE_ID_COOKIE_NAME];
+        if (!deviceId) {
+          deviceId = uuid();
+          ctx.res.cookie(DEVICE_ID_COOKIE_NAME, deviceId, {
+            ...BASE_COOKIE_OPTIONS,
+            maxAge: 1000 * 60 * 60 * 24,
+          });
+        }
+        await redis.hset(
+          ...redisKeys.participant(committee.id, countryCode),
+
+          deviceId
+        );
       }
-      if (!isChairCountry)
-        await redis.sadd(redisKeys.participants(committee.id), countryCode);
       const sessionToken = await generateSessionToken({
         committeeId,
         countryCode,
@@ -143,7 +172,7 @@ export const committeeRouter = router({
   logOut: authenticatedProcedure.mutation(async ({ ctx }) => {
     const { countryCode } = ctx.session;
     if (countryCode) {
-      await redis.srem(redisKeys.participants(ctx.committee.id), countryCode);
+      await redis.hdel(...redisKeys.participant(ctx.committee.id, countryCode));
       io.to(getSocketRoomFullPath(ctx.committee.id)).emit(
         socketEvents.participants.left,
         countryCode
@@ -159,7 +188,7 @@ export const committeeRouter = router({
       if (!countryCode) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
-          message: "Not a member",
+          message: "Not a member.",
         });
       }
       const votingSession = await redis.operations.getVotingSession(
@@ -169,7 +198,7 @@ export const committeeRouter = router({
       if (!votingSession) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Voting session not found",
+          message: "Voting session not found.",
         });
       }
       await redis.operations.addVotingRecord({
@@ -192,7 +221,7 @@ export const committeeRouter = router({
     if (!countryCode) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
-        message: "Not a member",
+        message: "Not a member.",
       });
     }
     const votingSession = await redis.operations.getVotingSession(
@@ -202,7 +231,7 @@ export const committeeRouter = router({
     if (!votingSession) {
       throw new TRPCError({
         code: "NOT_FOUND",
-        message: "Voting session not found",
+        message: "Voting session not found.",
       });
     }
     await redis.operations.deleteVotingRecord({

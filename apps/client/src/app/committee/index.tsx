@@ -3,6 +3,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useUser } from "@/hooks/use-user";
 
 import { useAppStore } from "@/lib/store";
+import { performForceLogOut } from "@/utils/perform-force-log-out";
 import { trpcClient } from "@/utils/trpc";
 import { useEffect } from "react";
 import { ChairView } from "./chair-view";
@@ -19,35 +20,33 @@ function CommitteePageContent() {
     setCurrentVotingSessionId,
   } = useAppStore();
   const { isChair } = useUser();
-  console.log({ isLoaded });
+
   useEffect(() => {
-    //!TEMPORARY
-    console.log()
-    const interval = setInterval(() => {
-      trpcClient.committee.getMine
-        .query()
-        .then(
-          ({
-            committee,
-            participants,
-            votingSessions,
-            currentVotingSessionId,
-          }) => {
-            setCommittee(committee);
-            setParticipants(participants);
-            setVotingSessions(votingSessions);
-            setCurrentVotingSessionId(currentVotingSessionId);
-           if(!isLoaded) setIsLoaded(true);
-          }
-        );
-    }, 500);
-    return () => clearInterval(interval);
+    trpcClient.committee.getMine
+      .query()
+      .then(
+        ({
+          committee,
+          participants,
+          votingSessions,
+          currentVotingSessionId,
+        }) => {
+          setCommittee(committee);
+          setParticipants(participants);
+          setVotingSessions(votingSessions);
+          setCurrentVotingSessionId(currentVotingSessionId);
+          setIsLoaded(true);
+        }
+      )
+      .catch(() => {
+        performForceLogOut();
+      });
   }, []);
 
   if (!isLoaded) return <Spinner />;
 
   return (
-    <div className="relative">
+    <div className="relative pb-20">
       {isChair ? <ChairView /> : <MemberView />}
       <FloatingBar />
     </div>

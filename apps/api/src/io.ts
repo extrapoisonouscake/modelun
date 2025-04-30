@@ -22,6 +22,7 @@ export let io: Server<
 
 export const initializeSocketIO = (server: HttpServer) => {
   io = new Server(server, {
+    connectionStateRecovery: {},
     cors: {
       origin: isDev
         ? ["http://localhost:3000", "http://localhost:3001"]

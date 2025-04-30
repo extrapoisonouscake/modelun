@@ -1,9 +1,9 @@
 import { VotingRecord } from "@repo/api";
 
 export const votingChoicesLabels: Record<VotingRecord["choice"], string> = {
-  YAY: "In favor",
+  YAY: "In favour",
   NAY: "Against",
-  ABSTAIN: "Abstain",
+  ABSTAIN: "Abstained",
 };
 export const votingChoicesColors: Record<
   VotingRecord["choice"],

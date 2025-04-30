@@ -1,5 +1,7 @@
-import { API_URL } from "@/constants";
+import { API_URL, IS_DEV } from "@/constants";
+import { getUser } from "@/hooks/use-user";
 import { AppState, useAppStore } from "@/lib/store";
+import { performForceLogOut } from "@/utils/perform-force-log-out";
 import {
   ClientToServerEvents,
   ServerToClientEvents,
@@ -28,7 +30,9 @@ export let socket:
 
 export const initSocket = () => {
   socket = io(API_URL, {
-    path: "/api/socket.io",
+    ackTimeout: 3000,
+    retries: 3,
+    path: `${!IS_DEV ? "/api" : ""}/socket.io`,
     withCredentials: true,
   });
   socket.on("connect", () => {
@@ -39,6 +43,14 @@ export const initSocket = () => {
   });
   socket.on(socketEvents.participants.joined, (countryCode) => {
     const setParticipants = getStateUpdater("participants");
+    const participants = useAppStore.getState().participants;
+    if (
+      !participants ||
+      participants.some(
+        (participant) => participant.countryCode === countryCode
+      )
+    )
+      return;
     setParticipants((participants) => [
       ...participants,
       { countryCode, isOnline: true },
@@ -51,6 +63,10 @@ export const initSocket = () => {
         (participant) => participant.countryCode !== countryCode
       )
     );
+
+    if (countryCode === getUser().countryCode) {
+      performForceLogOut();
+    }
   });
   socket.on(socketEvents.participants.online, (countryCode) => {
     const setParticipants = getStateUpdater("participants");
@@ -100,6 +116,9 @@ export const initSocket = () => {
       useAppStore.getState().deleteVotingRecord(votingSessionId, countryCode);
     }
   );
+  socket.on(socketEvents.moderation.banned, () => {
+    performForceLogOut();
+  });
 };
 
 export const destroySocket = () => {

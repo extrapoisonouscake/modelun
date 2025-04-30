@@ -1,3 +1,4 @@
+import { LoadingText } from "@/components/misc/loading-text";
 import { useUser } from "@/hooks/use-user";
 import { useInitializedAppStore } from "@/lib/store";
 import { flattenCountryInfo } from "../helpers";
@@ -8,10 +9,12 @@ export function MemberView() {
     (state) => state.currentVotingSessionId
   );
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-6">
       <CountryInfo />
-      {currentVotingSessionId && (
+      {currentVotingSessionId ? (
         <VotingSessionActions id={currentVotingSessionId} />
+      ) : (
+        <LoadingText>Waiting for actions...</LoadingText>
       )}
     </div>
   );
@@ -22,7 +25,7 @@ function CountryInfo() {
   const { customCountries } = useInitializedAppStore(
     (state) => state.committee
   );
-  const { name, imageUrl } = flattenCountryInfo(countryCode, customCountries);
+  const { name, imageUrl } = flattenCountryInfo(customCountries)(countryCode);
   return (
     <div className="flex items-center gap-2 w-full justify-center">
       <img src={imageUrl} alt={name} className="h-6 rounded-sm object-cover" />

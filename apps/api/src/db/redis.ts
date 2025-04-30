@@ -19,6 +19,7 @@ export const REDIS_PREFIXES = {
   VOTING_SESSIONS: "votingSessions",
   VOTING_RECORDS: "votingRecords",
   CURRENT_VOTING_SESSION_ID: "currentVotingSessionId",
+  BANNED_DEVICE_IDS: "bannedDeviceIds",
 } as const;
 export const redisKeys = {
   committee: (id: string) => joinRedisKey(REDIS_PREFIXES.COMMITTEE_BY_ID, id),
@@ -30,6 +31,8 @@ export const redisKeys = {
       committeeId,
       REDIS_PREFIXES.PARTICIPANTS
     ),
+  participant: (committeeId: Committee["id"], countryCode: string) =>
+    [redisKeys.participants(committeeId), countryCode] as const,
   votingSessions: (committeeId: Committee["id"]) =>
     joinRedisKey(
       REDIS_PREFIXES.COMMITTEE,
@@ -71,6 +74,12 @@ export const redisKeys = {
       committeeId,
       REDIS_PREFIXES.CURRENT_VOTING_SESSION_ID
     ),
+  bannedDeviceIds: (committeeId: Committee["id"]) =>
+    joinRedisKey(
+      REDIS_PREFIXES.COMMITTEE,
+      committeeId,
+      REDIS_PREFIXES.BANNED_DEVICE_IDS
+    ),
 };
 export const REDIS_KEY_EXPIRATION_TIME = 60 * 60 * 24; // 24 hours
 const jsonifyObject = (object: Record<string, string>) =>
@@ -91,6 +100,15 @@ const commonOperations = {
     if (!committee) return null;
     return JSON.parse(committee) as Committee;
   },
+  async getBannedDeviceIds(committeeId: Committee["id"]) {
+    return await redis.smembers(redisKeys.bannedDeviceIds(committeeId));
+  },
+  async addBannedDeviceId(committeeId: Committee["id"], deviceId: string) {
+    return await redis.sadd(redisKeys.bannedDeviceIds(committeeId), deviceId);
+  },
+  async removeBannedDeviceId(committeeId: Committee["id"], deviceId: string) {
+    return await redis.srem(redisKeys.bannedDeviceIds(committeeId), deviceId);
+  },
   async setCommittee(id: string, data: Committee) {
     return await redis.set(
       redisKeys.committee(id),
@@ -100,12 +118,13 @@ const commonOperations = {
     );
   },
   async getParticipants(committeeId: Committee["id"]) {
-    return new Set(await redis.smembers(redisKeys.participants(committeeId)));
+    return await redis.hgetall(redisKeys.participants(committeeId));
   },
-  async hasParticipant(committeeId: Committee["id"], countryCode: string) {
-    const participants = await this.getParticipants(committeeId);
-    if (!participants) return null;
-    return participants.has(countryCode);
+  async getParticipantDeviceId(
+    committeeId: Committee["id"],
+    countryCode: string
+  ) {
+    return await redis.hget(...redisKeys.participant(committeeId, countryCode));
   },
 
   async getVotingSessions(committeeId: Committee["id"]) {

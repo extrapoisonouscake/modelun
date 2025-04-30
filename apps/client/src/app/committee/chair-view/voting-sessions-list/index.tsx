@@ -33,7 +33,7 @@ export function VotesList() {
   if (currentVotingSessionId)
     return <VotingSessionControls id={currentVotingSessionId} />;
   return (
-    <div className="flex flex-col gap-2 md:absolute md:right-0 md:top-0">
+    <div className="flex flex-col gap-2 items-center md:items-end">
       <div className="flex items-center gap-2">
         <p className="font-medium">Voting Sessions</p>
         <AddVotingSession />
@@ -41,7 +41,7 @@ export function VotesList() {
       {Object.keys(votingSessions).length > 0 && (
         <ul>
           {Object.values(votingSessions).map((votingSession) => (
-            <li key={votingSession.id} className="flex gap-2">
+            <li key={votingSession.id} className="flex gap-2 items-center">
               <h3>
                 {votingSession.name}
                 {votingSession.wasOpen && (
@@ -62,7 +62,7 @@ export function VotesList() {
                   <Button
                     variant="outline"
                     size="icon-sm"
-                    className="border-l-none rounded-l-none"
+                    className="border-l-0 rounded-l-none text-destructive-foreground"
                     onClick={() => onDelete(votingSession.id)}
                   >
                     <TrashIcon className="size-4" />

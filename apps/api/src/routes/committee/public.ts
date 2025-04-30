@@ -11,7 +11,7 @@ export const joinCommitteeSchema = joinCommitteeBareSchema.refine(
     return data.passphrase || data.countryCode !== CHAIR_IDENTIFIER;
   },
   {
-    message: "Enter passphrase for chair",
+    message: "Enter passphrase for the dais.",
   }
 );
 export type JoinCommitteeSchema = z.infer<typeof joinCommitteeSchema>;

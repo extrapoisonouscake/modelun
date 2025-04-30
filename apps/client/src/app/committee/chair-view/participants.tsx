@@ -1,5 +1,8 @@
-import { LoadungText } from "@/components/misc/loading-text";
+import { LoadingText } from "@/components/misc/loading-text";
+import NumberFlow from "@number-flow/react";
+
 import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
   TooltipContent,
@@ -14,8 +17,8 @@ import {
 import { cn } from "@/lib/utils";
 import { FullCommittee } from "@/types/api";
 import { VotingRecord } from "@repo/api";
-import { votingChoicesLabels } from "../data";
-import { flattenCountryInfo } from "../helpers";
+import { votingChoicesColors, votingChoicesLabels } from "../data";
+import { flattenCountryInfo as flattenCountryInfoFn } from "../helpers";
 const votingChoices = [
   "YAY",
   "NAY",
@@ -61,42 +64,62 @@ function ParticipantsVotingView({
     committee.countries,
     votingSession.records
   );
+  const flattenCountryInfo = flattenCountryInfoFn(committee.customCountries);
+
   return (
-    <div className="flex flex-col gap-3 w-full max-w-[600px]">
-      {votingChoices.map((choice) => {
+    <div className="flex flex-col gap-4 w-full max-w-[600px]">
+      {votingChoices.map((choice, index) => {
+        const countries = Array(24).fill(participantsByChoice[choice]).flat();
         return (
-          <div key={choice} className="flex items-center gap-2 w-full">
-            <p className="text-sm text-gray-500 min-w-[80px] shrink-0">
-              {votingChoicesLabels[choice]}
-            </p>
-            <div className="grid grid-cols-[repeat(auto-fill,48px)] gap-2 w-full">
-              {participantsByChoice[choice].map((countryCode) => {
-                const { name, emoji, imageUrl } = flattenCountryInfo(
-                  countryCode,
-                  committee.customCountries
-                );
-                return (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <img
-                          src={imageUrl}
-                          alt={name}
-                          className="h-6 rounded-sm"
-                        />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>
-                          {emoji ? `${emoji} ` : ""}
-                          {name}
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                );
-              })}
+          <>
+            <div className="flex items-center gap-2 w-full">
+              <div className="flex items-center gap-2 min-w-[140px]">
+                <NumberFlow
+                  value={countries.length}
+                  className={cn(
+                    "text-4xl w-16 text-right font-medium",
+                    votingChoicesColors[choice].color
+                  )}
+                />
+                <p
+                  className={cn(
+                    "text-sm font-medium",
+                    votingChoicesColors[choice].color
+                  )}
+                >
+                  {votingChoicesLabels[choice]}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2 w-full">
+                {countries.map((countryCode) => {
+                  const { name, emoji, imageUrl } =
+                    flattenCountryInfo(countryCode);
+                  return (
+                    <TooltipProvider key={countryCode}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <img
+                            src={imageUrl}
+                            alt={name}
+                            className="h-6 rounded-sm object-cover"
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>
+                            {emoji ? `${emoji} ` : ""}
+                            {name}
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+            {index < votingChoices.length - 1 && (
+              <Separator className="bg-gradient-to-r from-transparent via-muted-foreground/20 to-transparent" />
+            )}
+          </>
         );
       })}
     </div>
@@ -109,28 +132,26 @@ function ParticipantsList({
   participants: LoadedCommitteeData["participants"];
   customCountries: FullCommittee["customCountries"];
 }) {
+  const flattenCountryInfo = flattenCountryInfoFn(customCountries);
   return (
     <div className="flex flex-wrap gap-3 flex-1">
       {participants.length > 0 ? (
         participants.map(({ countryCode, isOnline }) => {
-          const { name, imageUrl } = flattenCountryInfo(
-            countryCode,
-            customCountries
-          );
+          const { name, imageUrl } = flattenCountryInfo(countryCode);
           return (
             <Card
               key={countryCode}
-              className={cn("flex flex-col items-center gap-3 p-3", {
+              className={cn("flex flex-col items-center gap-3 p-3 max-w-32", {
                 "opacity-50": !isOnline,
               })}
             >
               <img src={imageUrl} alt={name} className="h-16 rounded-md" />
-              <p className="text-base font-medium">{name}</p>
+              <p className="text-sm font-medium text-center">{name}</p>
             </Card>
           );
         })
       ) : (
-        <LoadungText>Waiting for members to join...</LoadungText>
+        <LoadingText>Waiting for members to join...</LoadingText>
       )}
     </div>
   );

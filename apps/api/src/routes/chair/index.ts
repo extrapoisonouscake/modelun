@@ -1,5 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { v4 as uuid } from "uuid";
+import { z } from "zod";
 import { redis, redisKeys } from "../../db/redis";
 import { generateSixDigitCode } from "../../helpers";
 import { getSocketRoomFullPath, io } from "../../io";
@@ -10,6 +11,7 @@ import {
   votingSessionInProgressProcedure,
 } from "../procedures";
 import { publicProcedure, router } from "../trpc";
+import { hashString } from "./helpers";
 import {
   createCommitteeSchema,
   createVotingSessionSchema,
@@ -39,14 +41,13 @@ export const chairRouter = router({
       const code = await generateUniqueCode();
       const newCommittee = {
         name: input.name,
-        passphrase: input.passphrase,
+        passphrase: hashString(input.passphrase),
         id: uuid(),
         code,
         chairId,
         countries: input.countries,
         customCountries: input.customCountries,
       } satisfies Committee;
-
       await Promise.all([
         redis.set(
           redisKeys.committee(newCommittee.id),
@@ -128,7 +129,7 @@ export const chairRouter = router({
       if (currentVotingSessionId === input.id) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Cannot delete current voting session",
+          message: "Cannot delete current voting session.",
         });
       }
       await redis.hdel(...redisKeys.votingSession(ctx.committee.id, input.id));
@@ -145,7 +146,7 @@ export const chairRouter = router({
       if (currentVotingSessionId) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Voting session already started",
+          message: "Voting session already started.",
         });
       }
       const votingSession = await redis.operations.getVotingSession(
@@ -155,7 +156,7 @@ export const chairRouter = router({
       if (!votingSession) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Voting session not found",
+          message: "Voting session not found.",
         });
       }
       await Promise.all([
@@ -179,7 +180,7 @@ export const chairRouter = router({
       if (!votingSession) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Voting session not found",
+          message: "Voting session not found.",
         });
       }
       await redis.operations.deleteCurrentVotingSession(ctx.committee.id);
@@ -189,4 +190,41 @@ export const chairRouter = router({
       );
     }
   ),
+  banParticipant: chairProcedure
+    .input(z.object({ countryCode: z.string() }))
+    .mutation(async ({ input: { countryCode }, ctx }) => {
+      const deviceId = await redis.operations.getParticipantDeviceId(
+        ctx.committee.id,
+        countryCode
+      );
+      if (!deviceId) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Participant not found.",
+        });
+      }
+      await Promise.all([
+        redis.operations.addBannedDeviceId(ctx.committee.id, deviceId),
+        redis.hdel(...redisKeys.participant(ctx.committee.id, countryCode)),
+      ]);
+      io.to(getSocketRoomFullPath(ctx.committee.id)).emit(
+        socketEvents.participants.left,
+        countryCode
+      );
+      const socket = (
+        await io.in(getSocketRoomFullPath(ctx.committee.id)).fetchSockets()
+      ).find((socket) => socket.data.session.countryCode === countryCode);
+      if (socket) {
+        socket.emit(socketEvents.moderation.banned);
+      }
+    }),
+  deleteParticipant: chairProcedure
+    .input(z.object({ countryCode: z.string() }))
+    .mutation(async ({ input: { countryCode }, ctx }) => {
+      await redis.hdel(...redisKeys.participant(ctx.committee.id, countryCode));
+      io.to(getSocketRoomFullPath(ctx.committee.id)).emit(
+        socketEvents.participants.left,
+        countryCode
+      );
+    }),
 });

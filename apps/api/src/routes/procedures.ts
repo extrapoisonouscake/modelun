@@ -23,7 +23,7 @@ export const votingSessionInProgressProcedure = authenticatedProcedure.use(
     if (!votingSessionId) {
       throw new TRPCError({
         code: "NOT_FOUND",
-        message: "Voting session not found",
+        message: "Voting session not found.",
       });
     }
     return next({

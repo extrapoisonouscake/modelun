@@ -16,7 +16,7 @@ initializeSocketIO(server);
 
 const handler = trpcExpress.createExpressMiddleware({
   onError(e) {
-    console.error(e);
+    console.error(e.error);
   },
   router: appRouter,
   middleware: cors({

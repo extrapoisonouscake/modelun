@@ -15,6 +15,7 @@ export interface ServerToClientEvents {
     sessionId: VotingSession["id"],
     countryCode: string
   ) => void;
+  [socketEvents.moderation.banned]: () => void;
 }
 
 export interface ClientToServerEvents {
@@ -50,4 +51,5 @@ export const socketEvents = createSocketEvents({
     "vote_withdrawn",
   ],
   committee: ["updated"],
+  moderation: ["banned"],
 } as const);

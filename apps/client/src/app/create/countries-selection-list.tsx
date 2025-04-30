@@ -1,4 +1,5 @@
-import { Badge } from "@/components/ui/badge";
+import { flattenCountryInfo as flattenCountryInfoFn } from "@/app/committee/helpers";
+import { CountryBadge } from "@/components/misc/country-badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,22 +21,56 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import { useFormValidation } from "@/hooks/use-form-validation";
 import { cn } from "@/lib/utils";
 import { CustomCountrySchema, customCountrySchema } from "@repo/api";
-import {
-  countries,
-  getCountryData,
-  getEmojiFlag,
-  TCountryCode,
-} from "countries-list";
+import { countries, getEmojiFlag, TCountryCode } from "countries-list";
 import { Plus, X } from "lucide-react";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { FormProvider, useController } from "react-hook-form";
 import { z } from "zod";
 
-const countryOptions = Object.entries(countries).map(([code, data]) => ({
+export const countryOptions = Object.entries(countries).map(([code, data]) => ({
   value: code as TCountryCode,
   label: data.name,
   emoji: getEmojiFlag(code as TCountryCode),
 }));
+
+// Add country nicknames and common aliases
+const countryNicknames: Record<string, string[]> = {
+  US: [
+    "america",
+    "usa",
+    "united states of america",
+    "states",
+    "u.s.",
+    "u.s.a.",
+  ],
+  GB: ["britain", "england", "uk", "united kingdom", "great britain"],
+  RU: ["russia", "russian federation"],
+  CN: ["china", "peoples republic of china", "prc"],
+  KR: ["south korea", "korea"],
+  KP: ["north korea", "dprk", "democratic peoples republic of korea"],
+  DE: ["germany", "deutschland"],
+  FR: ["france", "french republic"],
+  IT: ["italy", "italian republic"],
+  ES: ["spain", "kingdom of spain"],
+  NL: ["netherlands", "holland", "dutch"],
+  CH: ["switzerland", "swiss confederation"],
+  SE: ["sweden", "kingdom of sweden"],
+  NO: ["norway", "kingdom of norway"],
+  DK: ["denmark", "kingdom of denmark"],
+  FI: ["finland", "republic of finland"],
+  IE: ["ireland", "republic of ireland"],
+  AU: ["australia", "commonwealth of australia"],
+  NZ: ["new zealand", "aotearoa"],
+  CA: ["canada", "great white north"],
+  MX: ["mexico", "united mexican states"],
+  BR: ["brazil", "brasil"],
+  AR: ["argentina", "argentine republic"],
+  ZA: ["south africa", "rsa"],
+  EG: ["egypt", "arab republic of egypt"],
+  IN: ["india", "bharat"],
+  JP: ["japan", "nippon", "nihon"],
+  CD: ["congo", "democratic republic of the congo", "drc"],
+};
 
 export function CountriesSelectionList() {
   const { field: countriesField } = useController({
@@ -84,11 +119,81 @@ export function CountriesSelectionList() {
     }
   };
 
-  const filteredCountries = countryOptions.filter(
-    (country) =>
-      country.label.toLowerCase().includes(searchValue.toLowerCase()) &&
-      !countriesField.value.includes(country.value)
-  );
+  const filteredCountries = countryOptions
+    .map((country) => {
+      const lowerCaseSearchValue = searchValue.toLowerCase();
+      const lowerCaseLabel = country.label.toLowerCase();
+
+      // Split search terms into words and filter out common words
+      const searchTerms = lowerCaseSearchValue
+        .split(/\s+/)
+        .filter((term) => !["the", "of", "and", "in", "to"].includes(term));
+
+      // If no meaningful search terms after filtering, return score 0
+      if (searchTerms.length === 0) {
+        return { country, score: 0 };
+      }
+
+      let score = 0;
+
+      // Check for exact match first
+      if (lowerCaseLabel === lowerCaseSearchValue) {
+        score += 100;
+      }
+
+      // Check for exact phrase match
+      if (lowerCaseLabel.includes(lowerCaseSearchValue)) {
+        score += 50;
+      }
+
+      // Check nicknames
+      const nicknames = countryNicknames[country.value] || [];
+      if (
+        nicknames.some(
+          (nickname) => nickname.toLowerCase() === lowerCaseSearchValue
+        )
+      ) {
+        score += 80; // High score for exact nickname match
+      }
+      if (
+        nicknames.some((nickname) =>
+          nickname.toLowerCase().includes(lowerCaseSearchValue)
+        )
+      ) {
+        score += 40; // Good score for partial nickname match
+      }
+
+      // Check for individual term matches
+      searchTerms.forEach((term, index) => {
+        if (lowerCaseLabel.includes(term)) {
+          // Terms at the start of the search get higher weight
+          const positionWeight = 1 - (index / searchTerms.length) * 0.5;
+          score += 20 * positionWeight;
+
+          // If the term is at the start of a word in the country name
+          if (
+            lowerCaseLabel.split(/\s+/).some((word) => word.startsWith(term))
+          ) {
+            score += 10;
+          }
+        }
+
+        // Check if term matches any nickname
+        if (
+          nicknames.some((nickname) => nickname.toLowerCase().includes(term))
+        ) {
+          score += 15; // Additional points for matching nickname terms
+        }
+      });
+
+      return { country, score };
+    })
+    .filter(
+      ({ country, score }) =>
+        score > 0 && !countriesField.value.includes(country.value)
+    )
+    .sort((a, b) => b.score - a.score)
+    .map(({ country }) => country);
   const addCustomCountry = (country: CustomCountrySchema) => {
     customCountriesField.onChange({
       ...customCountriesField.value,
@@ -103,49 +208,28 @@ export function CountriesSelectionList() {
   };
 
   const [hoveredCountryIndex, setHoveredCountryIndex] = useState<number>(0);
+  const flattenCountryInfo = flattenCountryInfoFn(customCountriesField.value);
   return (
     <div className="flex flex-col gap-2">
-      <Label>Countries</Label>
+      <Label>Delegates</Label>
       {countriesField.value.length > 0 && (
         <div className="flex flex-wrap gap-2">
-          {countriesField.value.map((code: TCountryCode) => {
-            let country: Omit<CustomCountrySchema, "imageUrl"> & {
-              imageUrl?: string;
-            };
-            if (code in countries) {
-              const regularCountry = getCountryData(code);
-
-              country = {
-                name: regularCountry.name,
-                code,
-                emoji: getEmojiFlag(code),
-              };
-            } else {
-              country = customCountriesField.value[code];
-            }
-
+          {countriesField.value.map((countryCode: TCountryCode) => {
+            const country = flattenCountryInfo(countryCode);
             return (
-              <Badge variant="secondary" className="text-sm" key={code}>
-                <span>
-                  {country.emoji || (
-                    <img
-                      src={country.imageUrl}
-                      alt={country.name}
-                      className="w-4 h-4 object-cover inline-block mr-1 align-[-0.2rem]"
-                    />
-                  )}{" "}
-                  {country.name}
-                </span>
-
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-4 rounded-sm p-0"
-                  onClick={() => removeCountry(code)}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </Badge>
+              <CountryBadge
+                country={country}
+                rightElement={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-4 rounded-sm p-0"
+                    onClick={() => removeCountry(country.code)}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                }
+              />
             );
           })}
         </div>
@@ -153,7 +237,7 @@ export function CountriesSelectionList() {
 
       <div className="relative">
         <Input
-          placeholder="Search countries..."
+          placeholder="Start typing..."
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
           onKeyDown={(e) => {
@@ -179,7 +263,8 @@ export function CountriesSelectionList() {
                 if (!searchValue) return;
                 handleOpenModal();
               }}
-              className="size-4"
+              data-disabled={!searchValue}
+              className="size-4 opacity-100 cursor-pointer data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50 transition-all duration-200"
             />
           }
         />

@@ -23,15 +23,16 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { getCountryData, getEmojiFlag, TCountryCode } from "countries-list";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 
 type LimitedCommittee = AppRouterOutput["committee"]["find"];
 export function JoinCommitteeForm() {
   const [committee, setCommittee] = useState<LimitedCommittee>();
 
   const form = useFormValidation(joinCommitteeSchema);
+
   const navigate = useNavigate();
   const joinCommittee = useJoinCommittee(navigate);
   async function onSubmit(data: JoinCommitteeSchema) {
@@ -53,7 +54,7 @@ export function JoinCommitteeForm() {
           <CommitteeSearch setCommittee={setCommittee} />
           <Link to="/create">
             <Button variant="outline" className="w-full">
-              Create Committee
+              Need to create a committee?
             </Button>
           </Link>
         </>
@@ -67,6 +68,15 @@ function CommitteeSearch({
   setCommittee: (committee: LimitedCommittee) => void;
 }) {
   const form = useFormContext<JoinCommitteeSchema>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const code = searchParams.get("code");
+  useEffect(() => {
+    if (code) {
+      form.setValue("code", code);
+      findCommittee();
+      setSearchParams({});
+    }
+  }, [code]);
   const [isLoading, setIsLoading] = useState(false);
   async function findCommittee() {
     const isValid = await form.trigger("code");
@@ -131,7 +141,7 @@ function Confirmation({
   return (
     <div className="flex flex-col gap-2">
       <Label>Committee</Label>
-      <Label>{committee.name}</Label>
+      <h2 className="text-xl font-bold">{committee.name}</h2>
       <CountrySelect
         allowedCountries={committee.countries}
         customCountries={committee.customCountries}
@@ -145,11 +155,11 @@ function Confirmation({
           placeholder="Enter the passphrase"
         />
       )}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-col gap-2">
+        <SubmitButton>Submit</SubmitButton>
         <Button variant="outline" onClick={goBack}>
           Back
         </Button>
-        <SubmitButton>Submit</SubmitButton>
       </div>
     </div>
   );
@@ -210,12 +220,13 @@ export function CountrySelect({
     <FormSelect
       name="countryCode"
       label="Country"
+      placeholder="Click to select..."
       options={[
         ...baseOptions,
         ...(showChair
           ? [
               {
-                label: "🌐 Chair",
+                label: "🧑‍⚖️ Dais",
                 value: CHAIR_IDENTIFIER,
               },
             ]

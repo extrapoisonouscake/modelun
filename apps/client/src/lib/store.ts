@@ -27,6 +27,7 @@ export type AppState = {
   deleteVotingSession: (votingSessionId: string) => void;
   startVotingSession: (votingSessionId: string) => void;
   endVotingSession: (votingSessionId: string) => void;
+  deleteParticipant: (countryCode: string) => void;
 };
 
 const initialState = {
@@ -131,6 +132,14 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({
       currentVotingSessionId: null,
     });
+  },
+  deleteParticipant: (countryCode) => {
+    const currentParticipants = get().participants;
+    if (!currentParticipants) return;
+    const newParticipants = currentParticipants.filter(
+      (participant) => participant.countryCode !== countryCode
+    );
+    set({ participants: newParticipants });
   },
   setIsLoaded: (isLoaded) => set({ isLoaded }),
   reset: () => set(initialState),
