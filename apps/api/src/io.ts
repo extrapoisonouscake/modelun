@@ -1,6 +1,6 @@
 import type { Server as HttpServer } from "http";
 import { Server } from "socket.io";
-import { CLIENT_ORIGIN, isDev, isProd } from "./constants";
+import { CLIENT_ORIGIN, isDev } from "./constants";
 import { verifySessionToken, type SessionTokenPayload } from "./routes/helpers";
 import {
   socketEvents,
@@ -29,7 +29,6 @@ export const initializeSocketIO = (server: HttpServer) => {
         : CLIENT_ORIGIN,
       credentials: true,
     },
-    path: isProd ? "/api/" : undefined,
   });
 
   io.use(async (socket, next) => {

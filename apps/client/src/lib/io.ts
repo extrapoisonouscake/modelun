@@ -32,7 +32,7 @@ export const initSocket = () => {
   socket = io(API_URL, {
     ackTimeout: 3000,
     retries: 3,
-    path: !IS_DEV ? "/api/" : undefined,
+    path: !IS_DEV ? "/api/socket.io" : undefined,
     withCredentials: true,
     transports: ["websocket"],
   });
