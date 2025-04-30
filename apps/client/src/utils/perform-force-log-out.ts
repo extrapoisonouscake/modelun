@@ -1,3 +1,7 @@
+import Cookies from "js-cookie";
 export const performForceLogOut = () => {
-  document.cookie = "session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+  Cookies.remove("session", {
+    secure: true,
+  });
+  window.location.href = "/";
 };
