@@ -39,6 +39,7 @@ function CommitteePageContent() {
         }
       )
       .catch(() => {
+        alert("Error fetching committee");
         performForceLogOut();
       });
   }, []);
